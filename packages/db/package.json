@@ -1,0 +1,26 @@
+{
+  "name": "@workspace/db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {".": "./src/index.ts"},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:migrate": "pnpm drizzle-kit migrate",
+    "db:generate": "pnpm drizzle-kit generate",
+    "db:push": "pnpm drizzle-kit push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.4.1",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.4"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.20.3"
+  }
+}
