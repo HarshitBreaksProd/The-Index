@@ -17,5 +17,5 @@ export const processingQueue = new Queue("card-processing", {
 });
 
 export interface CardProcessingJobData {
-cardId: number;
+  cardId: string;
 }

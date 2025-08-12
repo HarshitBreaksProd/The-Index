@@ -2,6 +2,7 @@ import z from "zod";
 import { privateProcedure, publicProcedure, t } from "../trpc";
 import { db, indexCards, indexes } from "@workspace/db";
 import { and, desc, eq, lt } from "drizzle-orm";
+import { CardProcessingJobData, processingQueue } from "@workspace/queue";
 
 export enum CardType {
   text = "text",
@@ -31,7 +32,7 @@ export const indexCardRouter = t.router({
     )
     .mutation(async (req) => {
       try {
-        const createdIndexCard = await db
+        const [createdIndexCard] = await db
           .insert(indexCards)
           .values({
             indexId: req.input.indexId,
@@ -41,8 +42,16 @@ export const indexCardRouter = t.router({
             title: req.input.title,
           })
           .returning();
+
+        // Logic to use queue
+        await processingQueue.add(`process-card-${createdIndexCard?.id}`, {
+          cardId: createdIndexCard?.id,
+        } as CardProcessingJobData);
+
+        console.log(`Dispatched job for ${createdIndexCard?.id}`);
+
         return {
-          createdIndexCard: createdIndexCard[0],
+          createdIndexCard: createdIndexCard,
         };
       } catch (error) {
         console.log(error);
