@@ -1,0 +1,2 @@
+ALTER TABLE "index_cards" ADD COLUMN "shareable_id" uuid DEFAULT gen_random_uuid() NOT NULL;--> statement-breakpoint
+ALTER TABLE "index_cards" ADD CONSTRAINT "index_cards_shareable_id_unique" UNIQUE("shareable_id");

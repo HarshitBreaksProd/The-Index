@@ -37,7 +37,7 @@ export const users = pgTable("users", {
 });
 
 export const indexes = pgTable("indexes", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -50,8 +50,8 @@ export const indexes = pgTable("indexes", {
 });
 
 export const indexCards = pgTable("index_cards", {
-  id: serial("id").primaryKey(),
-  indexId: integer("index_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  indexId: uuid("index_id")
     .notNull()
     .references(() => indexes.id, { onDelete: "cascade" }),
   userId: integer("user_id")
@@ -65,6 +65,7 @@ export const indexCards = pgTable("index_cards", {
   storageUrl: text("storage_url"),
   embedding: vector("embedding", { dimensions: 384 }),
   isShareable: boolean("is_shareable").default(false).notNull(),
+  shareableId: uuid("shareable_id").defaultRandom().notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -77,7 +78,7 @@ export const tags = pgTable("tags", {
 export const cardsToTags = pgTable(
   "cards_to_tags",
   {
-    cardId: integer("card_id")
+    cardId: uuid("card_id")
       .notNull()
       .references(() => indexCards.id, { onDelete: "cascade" }),
     tagId: integer("tag_id")

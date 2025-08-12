@@ -1,9 +1,9 @@
 import z from "zod";
 import jwt from "jsonwebtoken";
-import { publicProcedure, t } from "../trpc";
+import { publicProcedure, privateProcedure, t } from "../trpc";
 import { db, users } from "@workspace/db";
 import bcrypt from "bcrypt";
-import { DrizzleQueryError } from "drizzle-orm";
+import { DrizzleQueryError, eq } from "drizzle-orm";
 
 export type NeonDbError = {
   code: String;
@@ -68,5 +68,63 @@ export const authRouter = t.router({
     }),
   signin: publicProcedure
     .input(z.object({ email: z.string(), password: z.string() }))
-    .mutation((req) => {}),
+    .mutation(async (req) => {
+      try {
+        const userFound = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, req.input.email))
+          .limit(1);
+
+        if (!userFound[0]) {
+          return {
+            message: "user not found",
+          };
+        }
+
+        const passwordMatch = bcrypt.compare(
+          req.input.password,
+          userFound[0]?.passwordHash!
+        );
+
+        if (!passwordMatch) {
+          return {
+            message: "incorrect password",
+          };
+        }
+
+        const token = jwt.sign(
+          { userId: userFound[0].id, name: userFound[0].name },
+          process.env.JWT_SECRET!
+        );
+        req.ctx.res.cookie("jwt", token, { httpOnly: true });
+
+        return {
+          message: "user logged in",
+        };
+      } catch (error) {
+        return {
+          message: "error finding user",
+        };
+      }
+    }),
+  getUser: privateProcedure.query(async (req) => {
+    const userId = Number(req.ctx.user.userId);
+    try {
+      const user = await db.select().from(users).where(eq(users.id, userId));
+      if (!user[0]) {
+        return {
+          message: "user not found",
+        };
+      }
+      return {
+        user: user[0],
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        message: "error fetching user info",
+      };
+    }
+  }),
 });

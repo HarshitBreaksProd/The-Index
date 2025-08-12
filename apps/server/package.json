@@ -13,6 +13,7 @@
     "@trpc/server": "^11.4.4",
     "@workspace/db": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "@workspace/queue": "workspace:*",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

@@ -1,6 +1,6 @@
 {
-  "id": "b4259a90-17dc-43e6-853e-19ac8ad27839",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "6b379622-a8e7-4958-adee-1482085edc96",
+  "prevId": "203616f6-1fe3-4f76-bfb7-7b2c2ac774f8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -72,7 +72,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "index_id": {
           "name": "index_id",
@@ -138,6 +139,13 @@
           "notNull": true,
           "default": false
         },
+        "shareable_id": {
+          "name": "shareable_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -176,7 +184,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "index_cards_shareable_id_unique": {
+          "name": "index_cards_shareable_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "shareable_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -189,7 +205,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",

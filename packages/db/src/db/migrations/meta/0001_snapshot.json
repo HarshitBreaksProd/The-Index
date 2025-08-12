@@ -1,6 +1,6 @@
 {
-  "id": "b4259a90-17dc-43e6-853e-19ac8ad27839",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "203616f6-1fe3-4f76-bfb7-7b2c2ac774f8",
+  "prevId": "b4259a90-17dc-43e6-853e-19ac8ad27839",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -72,7 +72,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "index_id": {
           "name": "index_id",
@@ -189,7 +190,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",

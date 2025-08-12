@@ -1,18 +1,16 @@
--- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "vector";--> statement-breakpoint
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";--> statement-breakpoint
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 CREATE TYPE "public"."card_status" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."card_type" AS ENUM('text', 'url', 'pdf', 'youtube', 'spotify', 'tweet');--> statement-breakpoint
 CREATE TABLE "cards_to_tags" (
-	"card_id" integer NOT NULL,
+	"card_id" uuid NOT NULL,
 	"tag_id" integer NOT NULL,
 	CONSTRAINT "cards_to_tags_card_id_tag_id_pk" PRIMARY KEY("card_id","tag_id")
 );
 --> statement-breakpoint
 CREATE TABLE "index_cards" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"index_id" integer NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
+	"index_id" uuid NOT NULL,
 	"user_id" integer NOT NULL,
 	"type" "card_type" NOT NULL,
 	"source" text NOT NULL,
@@ -26,7 +24,7 @@ CREATE TABLE "index_cards" (
 );
 --> statement-breakpoint
 CREATE TABLE "indexes" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text,
