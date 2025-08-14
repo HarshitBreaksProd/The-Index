@@ -1,8 +1,9 @@
 import z from "zod";
 import { privateProcedure, publicProcedure, t } from "../trpc";
-import { db, indexCards, indexes } from "@workspace/db";
+import { db } from "@workspace/db";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { CardProcessingJobData, processingQueue } from "@workspace/queue";
+import { indexCards } from "@workspace/db/schema";
 
 export enum CardType {
   text = "text",

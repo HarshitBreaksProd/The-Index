@@ -1,12 +1,15 @@
 {
-  "name": "shadcn-ui-monorepo",
+  "name": "theindex",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate": "cd ./packages/db && pnpm run db:generate && cd ../..",
+    "start:server": "cd ./apps/server && pnpm run start && cd ../..",
+    "start:worker": "cd ./apps/worker && pnpm run start && cd ../.."
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

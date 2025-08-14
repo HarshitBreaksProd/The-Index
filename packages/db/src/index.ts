@@ -11,5 +11,3 @@ if (!connectionString) {
 
 const sql = neon(connectionString);
 export const db = drizzle(sql);
-
-export * from "./db/schema";

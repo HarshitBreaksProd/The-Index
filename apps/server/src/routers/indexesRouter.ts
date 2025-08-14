@@ -1,7 +1,8 @@
 import z from "zod";
 import { privateProcedure, publicProcedure, t } from "../trpc";
-import { db, indexCards, indexes } from "@workspace/db";
+import { db } from "@workspace/db";
 import { and, desc, eq, lt } from "drizzle-orm";
+import { indexCards, indexes } from "@workspace/db/schema";
 
 export const indexesRouter = t.router({
   create: privateProcedure

@@ -1,9 +1,10 @@
 import z from "zod";
 import jwt from "jsonwebtoken";
 import { publicProcedure, privateProcedure, t } from "../trpc";
-import { db, users } from "@workspace/db";
+import { db } from "@workspace/db";
 import bcrypt from "bcrypt";
 import { DrizzleQueryError, eq } from "drizzle-orm";
+import { users } from "@workspace/db/schema";
 
 export type NeonDbError = {
   code: String;

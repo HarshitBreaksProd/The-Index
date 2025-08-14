@@ -59,6 +59,7 @@ export const indexCards = pgTable("index_cards", {
     .references(() => users.id, { onDelete: "cascade" }),
   type: cardTypeEnum("type").notNull(),
   source: text("source").notNull(),
+  processedContent: text('processed_content').default(""),
   title: varchar("title", { length: 255 }).notNull(),
   status: cardStatusEnum("status").default("pending").notNull(),
   errorMessage: text("error_message"),

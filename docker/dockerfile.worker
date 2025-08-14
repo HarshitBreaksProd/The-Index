@@ -1,0 +1,26 @@
+FROM node:24-alpine AS base
+
+RUN npm install -g pnpm typescript
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY turbo.json tsconfig.json ./
+
+COPY ./apps/worker/package.json ./apps/worker/
+
+COPY packages/db/package.json ./packages/db/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/typescript-config ./packages/typescript-config
+COPY packages/eslint-config ./packages/eslint-config
+
+RUN pnpm install
+
+COPY packages/ ./packages/
+COPY apps/worker/ ./apps/worker/
+
+RUN pnpm run db:generate
+
+RUN pnpm run build
+
+CMD ["pnpm", "run", "start:worker"]
