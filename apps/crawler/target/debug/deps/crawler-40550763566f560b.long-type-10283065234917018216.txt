@@ -1,1 +1,0 @@
-fn({type error}) -> impl Future<Output = impl Into<{type error}>> {scrape_handler}: Handler<_, _, _>

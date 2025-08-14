@@ -1,1 +1,0 @@
-Router<_, _>: hyper::service::make::MakeServiceRef<hyper::server::tcp::addr_stream::AddrStream, Body>

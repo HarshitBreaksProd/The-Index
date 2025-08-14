@@ -1,2 +1,0 @@
-fn(Query<ScrapeRequest>) -> impl Future<Output = Response<http_body::combinators::box_body::UnsyncBoxBody<axum::body::Bytes, axum::Error>>> {scrape_handler}
-fn(Query<ScrapeRequest>) -> impl Future<Output = Response<http_body::combinators::box_body::UnsyncBoxBody<axum::body::Bytes, axum::Error>>> {scrape_handler}: Handler<_, _, _>

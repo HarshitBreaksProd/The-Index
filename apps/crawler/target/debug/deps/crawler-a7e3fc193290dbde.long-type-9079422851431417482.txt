@@ -1,1 +1,0 @@
-fn(Query<ScrapeRequest>) -> impl Future<Output = impl IntoResponse> {scrape_handler}: Handler<_, _, _>
