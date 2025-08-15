@@ -5,15 +5,15 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec bun run src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@trpc/server": "^11.4.4",
     "@workspace/db": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
     "@workspace/queue": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -34,6 +34,6 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.17.19",
-    "nodemon": "^3.1.10"
+    "tsx": "^4.20.3"
   }
 }

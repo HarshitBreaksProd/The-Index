@@ -29,6 +29,20 @@
       "when": 1755100570960,
       "tag": "0003_tiny_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1755231258440,
+      "tag": "0004_slimy_nightmare",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755242049529,
+      "tag": "0005_handy_thunderbolt",
+      "breakpoints": true
     }
   ]
 }

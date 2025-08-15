@@ -43,6 +43,7 @@ async fn scrape_handler(Query(params): Query<ScrapeRequest>) -> impl IntoRespons
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
+            println!("Sending error back {}", e);
             let error_response = ErrorResponse {
                 error: e.to_string(),
             };

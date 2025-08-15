@@ -1,0 +1,1 @@
+ALTER TABLE "index_cards" DROP COLUMN "processed_content";
