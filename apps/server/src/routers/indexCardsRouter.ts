@@ -85,7 +85,7 @@ export const indexCardRouter = t.router({
 
         const updatedIndexCard = await db
           .update(indexCards)
-          .set({ isShareable: req.input.value })
+          .set({ isPublic: req.input.value })
           .where(eq(indexCards.id, req.input.indexCardId))
           .returning();
         return {
@@ -107,7 +107,7 @@ export const indexCardRouter = t.router({
           .from(indexCards)
           .where(eq(indexCards.shareableId, req.input.shareableId));
 
-        if (fetchedIndexCard[0]?.isShareable) {
+        if (fetchedIndexCard[0]?.isPublic) {
           return {
             fetchedIndexCard: fetchedIndexCard[0],
           };

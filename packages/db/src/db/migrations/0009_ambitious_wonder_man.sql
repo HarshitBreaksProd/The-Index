@@ -1,0 +1,1 @@
+ALTER TABLE "index_cards" RENAME COLUMN "is_shareable" TO "is_public";

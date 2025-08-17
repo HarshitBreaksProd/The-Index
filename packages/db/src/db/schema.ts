@@ -67,7 +67,7 @@ export const indexCards = pgTable("index_cards", {
   status: cardStatusEnum("status").default("pending").notNull(),
   errorMessage: text("error_message"),
   storageUrl: text("storage_url"),
-  isShareable: boolean("is_shareable").default(false).notNull(),
+  isPublic: boolean("is_public").default(false).notNull(),
   shareableId: uuid("shareable_id").defaultRandom().notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
