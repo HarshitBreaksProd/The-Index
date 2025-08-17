@@ -62,7 +62,9 @@ export const authRouter = t.router({
           message: "error creating token for user",
         };
       }
-      req.ctx.res.cookie("jwt", token, { httpOnly: true });
+      if (req.ctx.res) {
+        req.ctx.res.cookie("jwt", token, { httpOnly: true });
+      }
       return {
         message: "The user has been created",
       };
@@ -98,8 +100,9 @@ export const authRouter = t.router({
           { userId: userFound[0].id, name: userFound[0].name },
           process.env.JWT_SECRET!
         );
-        req.ctx.res.cookie("jwt", token, { httpOnly: true });
-
+        if (req.ctx.res) {
+          req.ctx.res.cookie("jwt", token, { httpOnly: true });
+        }
         return {
           message: "user logged in",
         };

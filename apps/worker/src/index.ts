@@ -2,12 +2,12 @@ import { Worker } from "bullmq";
 import { processingQueue, redisConnection } from "@workspace/queue";
 import type { CardProcessingJobData } from "@workspace/queue";
 import { db } from "@workspace/db";
-import { indexCards } from "@workspace/db/schema";
+import { cardChunks, indexCards } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import "dotenv/config";
 import axios from "axios";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import EmbeddingPipeline from "./embedding";
+import EmbeddingPipeline from "@workspace/embedding-model";
 
 const CRAWLER_URL = process.env.CRAWLER_URL;
 if (!CRAWLER_URL) {
@@ -65,28 +65,59 @@ const worker = new Worker<CardProcessingJobData>(
 
       console.log("[CHUNKING] Splitting content into chunks...");
       const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 100,
+        chunkSize: 750,
+        chunkOverlap: 75,
       });
       const chunks = await splitter.splitText(processedContent);
       console.log(`[CHUNKING] Created ${chunks.length} chunks.`);
 
       console.log("[VECTORIZING] Generating embeddings for chunks...");
+
       const embedder = await EmbeddingPipeline.getInstance();
 
       const embeddings = await embedder(chunks, {
         pooling: "mean",
         normalize: true,
       });
+
       console.log("[VECTORIZING] Embeddings generated successfully.");
 
-      const avgEmbedding = averageEmbeddings(embeddings.tolist());
+      console.log(
+        `[DB] Inserting ${chunks.length} chunks into the database...`
+      );
+
+      const embeddingsList = embeddings.tolist();
+
+      const chunkDataToInsert = chunks
+        .map((chunkText, index) => {
+          const embedding = embeddingsList[index];
+          return {
+            cardId: card.id,
+            chunkText,
+            embedding,
+          };
+        })
+        .filter((chunk) => chunk.chunkText && chunk.embedding);
+
+      try {
+        await retry(async () => {
+          console.log(
+            `[DB] Attempting to insert ${chunkDataToInsert.length} chunks...`
+          );
+          await db.insert(cardChunks).values(chunkDataToInsert);
+        });
+        console.log("[DB] Batch insert successful.");
+      } catch (error) {
+        console.error("[DB] Batch insert failed after all retries", error);
+
+        throw new Error("Failed to insert chunks into the database");
+      }
 
       await db
         .update(indexCards)
         .set({
           status: "completed",
-          embedding: avgEmbedding,
+          processedContent,
         })
         .where(eq(indexCards.id, cardId));
 
@@ -123,22 +154,19 @@ worker.on("failed", (job, err) => {
   console.log(`Job ${job?.id} has failed with an error: ${err.message}`);
 });
 
-const averageEmbeddings: (embeddings: number[][]) => number[] = (
-  embeddings
-) => {
-  if (embeddings.length === 0) return [];
-
-  const embeddingLength = embeddings[0]!.length;
-  const avg = new Array(embeddingLength).fill(0);
-
-  for (const embedding of embeddings) {
-    for (let i = 0; i < embeddingLength; i++) {
-      avg[i] += embedding[i];
+async function retry<T>(
+  fn: () => Promise<T>,
+  retries = 1,
+  delay = 1000
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0) {
+      console.log(`[RETRY] Operation failed. Retrying in ${delay}ms...`);
+      await new Promise((res) => setTimeout(res, delay));
+      return retry(fn, retries - 1, delay);
     }
+    throw error;
   }
-
-  for (let i = 0; i < embeddingLength; i++) {
-    avg[i] /= embeddings.length;
-  }
-  return avg;
-};
+}
