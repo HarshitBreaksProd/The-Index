@@ -8,6 +8,8 @@ import "dotenv/config";
 import axios from "axios";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import EmbeddingPipeline from "@workspace/embedding-model";
+import { retry } from "./utils/retry";
+import { runTranscriptionService } from "./transcription-service";
 
 const CRAWLER_URL = process.env.CRAWLER_URL;
 if (!CRAWLER_URL) {
@@ -43,6 +45,7 @@ const worker = new Worker<CardProcessingJobData>(
           processedContent = card.source;
           break;
         case "url":
+        case "tweet":
           console.log(
             `[PROCESSING] Type: url. Calling crawler for: ${card.source}`
           );
@@ -55,6 +58,25 @@ const worker = new Worker<CardProcessingJobData>(
           );
           break;
 
+        case "youtube":
+          console.log(
+            `[PROCESSING] Type: youtube. Calling transcription for: ${card.source}`
+          );
+
+          const transcription = await runTranscriptionService(card.source);
+
+          if (!transcription.text) {
+            throw new Error("Trancripton text not found");
+          }
+
+          processedContent = transcription.text;
+          break;
+        
+        case "spotify":
+
+
+        case "pdf":
+          throw new Error("Pdfs are not supported as of now.")
         default:
           throw new Error(`Unsupported card type: ${card.type}`);
       }
@@ -153,20 +175,3 @@ worker.on("completed", (job) => {
 worker.on("failed", (job, err) => {
   console.log(`Job ${job?.id} has failed with an error: ${err.message}`);
 });
-
-async function retry<T>(
-  fn: () => Promise<T>,
-  retries = 1,
-  delay = 1000
-): Promise<T> {
-  try {
-    return await fn();
-  } catch (error) {
-    if (retries > 0) {
-      console.log(`[RETRY] Operation failed. Retrying in ${delay}ms...`);
-      await new Promise((res) => setTimeout(res, delay));
-      return retry(fn, retries - 1, delay);
-    }
-    throw error;
-  }
-}

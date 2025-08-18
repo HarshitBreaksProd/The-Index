@@ -1,5 +1,6 @@
 use axum::{Json, Router, extract::Query, http::StatusCode, response::IntoResponse, routing::get};
 use fantoccini::{ClientBuilder, Locator};
+use regex::Regex;
 use scraper::{ElementRef, Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -81,48 +82,100 @@ async fn run_crawler(url: String) -> Result<String, Box<dyn Error + Send + Sync>
 
     let mut final_content_html = String::new();
 
-    for attempt in 0..MAX_ATTEMPTS {
-        let best_element_html = {
-            let body_html = client.find(Locator::Css("body")).await?.html(true).await?;
-            let fragment = Html::parse_fragment(&body_html);
-            find_best_element_html(&fragment).unwrap_or_else(|| body_html.clone())
-        };
+    let tweet_regex =
+        Regex::new(r"^(https?:\/\/)?(x\.com|twitter\.com)\/[a-zA-Z0-9_]+\/status\/[0-9]+")?;
 
-        println!(
-            "Attempt {}: Current content length = {}",
-            attempt + 1,
-            best_element_html.len()
-        );
+    if tweet_regex.is_match(&url) {
+        println!("✅ Detected Tweet URL. Using fast article extraction logic.");
 
-        if best_element_html.len() == previous_content.len() && !best_element_html.is_empty() {
-            stable_polls += 1;
+        let mut temp_html = String::new();
+
+        for attempt in 0..MAX_ATTEMPTS {
+            let article_html = match client.find(Locator::Css("article")).await {
+                Ok(element) => element.html(true).await?,
+                Err(_) => {
+                    println!("Attempt {}: Article tag not found yet.", attempt + 1);
+                    tokio::time::sleep(Duration::from_secs(POLLING_INTERVAL_SECS)).await;
+                    continue;
+                }
+            };
+
             println!(
-                "Content is stable. Polls = {}/{}",
-                stable_polls, REQUIRED_STABLE_POLLS
+                "Attempt {}: Current tweet length = {}",
+                attempt + 1,
+                article_html.len()
             );
+
+            if article_html.len() == previous_content.len() && !article_html.is_empty() {
+                stable_polls += 1;
+                println!(
+                    "Tweet content stable. Polls = {}/{}",
+                    stable_polls, REQUIRED_STABLE_POLLS
+                );
+            } else {
+                stable_polls = 0;
+                previous_content = article_html.clone();
+                println!("Tweet content changed. Resetting stability counter.");
+            }
+
+            if stable_polls >= REQUIRED_STABLE_POLLS {
+                println!("Main tweet has stabilized.");
+                temp_html = article_html;
+                break;
+            }
+
+            tokio::time::sleep(Duration::from_secs(POLLING_INTERVAL_SECS)).await;
+        }
+
+        if temp_html.is_empty() {
+            println!("Warning: Tweet did not stabilize. Using last known content.");
+            final_content_html = previous_content;
         } else {
-            stable_polls = 0;
-            previous_content = best_element_html.clone();
-            println!("Content changed. Resetting stability counter.");
+            final_content_html = temp_html;
+        }
+    } else {
+        for attempt in 0..MAX_ATTEMPTS {
+            let best_element_html = {
+                let body_html = client.find(Locator::Css("body")).await?.html(true).await?;
+                let fragment = Html::parse_fragment(&body_html);
+                find_best_element_html(&fragment).unwrap_or_else(|| body_html.clone())
+            };
+
+            println!(
+                "Attempt {}: Current content length = {}",
+                attempt + 1,
+                best_element_html.len()
+            );
+
+            if best_element_html.len() == previous_content.len() && !best_element_html.is_empty() {
+                stable_polls += 1;
+                println!(
+                    "Content is stable. Polls = {}/{}",
+                    stable_polls, REQUIRED_STABLE_POLLS
+                );
+            } else {
+                stable_polls = 0;
+                previous_content = best_element_html.clone();
+                println!("Content changed. Resetting stability counter.");
+            }
+
+            if stable_polls >= REQUIRED_STABLE_POLLS {
+                println!("Main content has stabilized. Proceeding to scrape.");
+                final_content_html = best_element_html;
+                break;
+            }
+
+            tokio::time::sleep(Duration::from_secs(POLLING_INTERVAL_SECS)).await;
         }
 
-        if stable_polls >= REQUIRED_STABLE_POLLS {
-            println!("Main content has stabilized. Proceeding to scrape.");
-            final_content_html = best_element_html;
-            break;
+        if stable_polls < REQUIRED_STABLE_POLLS {
+            println!(
+                "Warning: Content did not stabilize after {} attempts. Using last known content.",
+                MAX_ATTEMPTS
+            );
+            final_content_html = previous_content;
         }
-
-        tokio::time::sleep(Duration::from_secs(POLLING_INTERVAL_SECS)).await;
     }
-
-    if stable_polls < REQUIRED_STABLE_POLLS {
-        println!(
-            "Warning: Content did not stabilize after {} attempts. Using last known content.",
-            MAX_ATTEMPTS
-        );
-        final_content_html = previous_content;
-    }
-
     client.close().await?;
 
     let formatted_text = html2text::from_read(final_content_html.as_bytes(), 80);

@@ -16,7 +16,7 @@ import { relations } from "drizzle-orm";
 export const cardTypeEnum = pgEnum("card_type", [
   "text",
   "url",
-  "pdf",
+  "pdf", // -> support will be added later
   "youtube",
   "spotify",
   "tweet",

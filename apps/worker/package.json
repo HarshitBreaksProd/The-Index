@@ -17,12 +17,14 @@
     "@workspace/db": "workspace:*",
     "@workspace/embedding-model": "workspace:*",
     "@workspace/queue": "workspace:*",
+    "assemblyai": "^4.15.0",
     "axios": "^1.11.0",
     "bullmq": "^5.56.10",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.4",
     "langchain": "^0.3.30",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
     "tsx": "^4.20.3",
