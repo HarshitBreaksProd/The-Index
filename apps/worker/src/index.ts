@@ -71,12 +71,18 @@ const worker = new Worker<CardProcessingJobData>(
 
           processedContent = transcription.text;
           break;
-        
+
         case "spotify":
+          await db
+            .update(indexCards)
+            .set({
+              status: "completed",
+            })
+            .where(eq(indexCards.id, cardId));
 
-
+          return;
         case "pdf":
-          throw new Error("Pdfs are not supported as of now.")
+          throw new Error("Pdfs are not supported as of now.");
         default:
           throw new Error(`Unsupported card type: ${card.type}`);
       }
