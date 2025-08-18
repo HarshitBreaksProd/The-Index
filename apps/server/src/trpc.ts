@@ -26,7 +26,7 @@ export const createContext = async (
   }
 
   if (!token) {
-    return { user: null };
+    return { user: null, res: res as Response | undefined };
   }
 
   try {

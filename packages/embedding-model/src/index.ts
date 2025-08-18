@@ -1,5 +1,5 @@
-import {
-  pipeline,
+import { pipeline } from "@xenova/transformers";
+import type {
   PipelineType,
   FeatureExtractionPipeline,
 } from "@xenova/transformers";

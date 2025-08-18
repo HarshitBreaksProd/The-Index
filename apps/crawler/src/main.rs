@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::net::SocketAddr;
 use std::time::Duration;
+use std::env;
 
 #[derive(Deserialize)]
 struct ScrapeRequest {
@@ -54,7 +55,7 @@ async fn scrape_handler(Query(params): Query<ScrapeRequest>) -> impl IntoRespons
 }
 
 async fn run_crawler(url: String) -> Result<String, Box<dyn Error + Send + Sync>> {
-    let webdriver_url = "http://localhost:9515";
+    let webdriver_url = env::var("WEBDRIVER_URL").unwrap_or_else(|_| "http://localhost:9515".to_string());
     let mut caps = serde_json::map::Map::new();
     let chrome_opts = serde_json::json!({
       "args": [
@@ -68,7 +69,7 @@ async fn run_crawler(url: String) -> Result<String, Box<dyn Error + Send + Sync>
 
     let client = ClientBuilder::native()
         .capabilities(caps)
-        .connect(webdriver_url)
+        .connect(&webdriver_url)
         .await?;
 
     client.goto(&url).await?;

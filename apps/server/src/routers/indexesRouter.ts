@@ -83,7 +83,12 @@ export const indexesRouter = t.router({
           .from(indexes)
           .orderBy(desc(indexes.createdAt))
           .limit(pageSize)
-          .where(cursorDate ? lt(indexes.createdAt, cursorDate) : undefined);
+          .where(
+            and(
+              cursorDate ? lt(indexes.createdAt, cursorDate) : undefined,
+              eq(indexes.userId, Number(req.ctx.user.userId))
+            )
+          );
 
         const hasNextPage = fetchedIndexes.length === pageSize;
         const nextCursor =
