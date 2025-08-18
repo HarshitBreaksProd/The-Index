@@ -7,6 +7,7 @@ use std::error::Error;
 use std::net::SocketAddr;
 use std::time::Duration;
 use std::env;
+use dotenvy::dotenv;
 
 #[derive(Deserialize)]
 struct ScrapeRequest {
@@ -25,8 +26,10 @@ struct ErrorResponse {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+    let port: u16 = env::var("PORT").ok().and_then(|v| v.parse().ok()).unwrap_or(3005);
     let app = Router::new().route("/scrape", get(scrape_handler));
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3005));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("Crawler service listening on {}", addr);
 
     axum::Server::bind(&addr)
@@ -55,7 +58,8 @@ async fn scrape_handler(Query(params): Query<ScrapeRequest>) -> impl IntoRespons
 }
 
 async fn run_crawler(url: String) -> Result<String, Box<dyn Error + Send + Sync>> {
-    let webdriver_url = env::var("WEBDRIVER_URL").unwrap_or_else(|_| "http://localhost:9515".to_string());
+    let webdriver_url = env::var("WEBDRIVER_URL").unwrap_or_else(|_| "http://chromedriver:4444".to_string());
+    println!("Crawler attached to webdriver {}", webdriver_url);
     let mut caps = serde_json::map::Map::new();
     let chrome_opts = serde_json::json!({
       "args": [

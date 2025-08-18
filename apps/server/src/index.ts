@@ -40,8 +40,8 @@ process.on("SIGTERM", () => {
   server.close();
 });
 
-server.listen(process.env.PORT, () => {
-  console.log(`The server is running on ${process.env.PORT}`);
+server.listen(process.env.SERVER_PORT, () => {
+  console.log(`The server is running on ${process.env.SERVER_PORT}`);
 });
 
 export type AppRouter = typeof appRouter;

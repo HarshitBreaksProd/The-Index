@@ -13,3 +13,4 @@ axum = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 html2text = "0.6"
 regex = "1"
+dotenvy = "0.15"

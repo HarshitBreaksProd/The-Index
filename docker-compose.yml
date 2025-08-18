@@ -6,11 +6,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      PORT: ${PORT}
+      SERVER_PORT: ${SERVER_PORT}
       JWT_SECRET: ${JWT_SECRET}
       SALTROUNDS: ${SALTROUNDS}
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
 
   worker:
     build:
@@ -19,3 +20,27 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
+      CRAWLER_URL: ${CRAWLER_URL}
+      ASSEMBLYAI_API_KEY: ${ASSEMBLYAI_API_KEY}
+
+  crawler:
+    build:
+      context: .
+      dockerfile: docker/dockerfile.crawler
+    ports:
+      - "3005:3005"
+    environment:
+      CRAWLER_PORT: ${CRAWLER_PORT}
+      WEBDRIVER_URL: ${WEBDRIVER_URL}
+    depends_on:
+      chromedriver:
+        condition: service_healthy
+
+  chromedriver:
+    image: seleniarm/standalone-chromium:latest
+    shm_size: '2g'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

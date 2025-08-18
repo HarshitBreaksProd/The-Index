@@ -3,7 +3,7 @@ import { privateProcedure, publicProcedure, t } from "../trpc";
 import { db } from "@workspace/db";
 import { and, desc, eq, lt } from "drizzle-orm";
 import { CardProcessingJobData, processingQueue } from "@workspace/queue";
-import { indexCards } from "@workspace/db/schema";
+import { indexCards, indexes } from "@workspace/db/schema";
 
 export enum CardType {
   text = "text",
@@ -33,6 +33,19 @@ export const indexCardRouter = t.router({
     )
     .mutation(async (req) => {
       try {
+        const toBeUpdatedIndex = await db
+          .select({ userId: indexes.userId })
+          .from(indexes)
+          .where(eq(indexes.id, req.input.indexId));
+
+        const indexUserId = toBeUpdatedIndex[0]?.userId;
+
+        if (Number(req.ctx.user.userId) !== indexUserId) {
+          return {
+            message: "Only the owner of index can add cards to it",
+          };
+        }
+
         const [createdIndexCard] = await db
           .insert(indexCards)
           .values({
