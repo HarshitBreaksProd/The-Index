@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/dockerfile.server
     ports:
-      - "3000:3000"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
       SERVER_PORT: ${SERVER_PORT}
       JWT_SECRET: ${JWT_SECRET}
@@ -28,7 +28,7 @@ services:
       context: .
       dockerfile: docker/dockerfile.crawler
     ports:
-      - "3005:3005"
+      - "${CRAWLER_PORT}:${CRAWLER_PORT}"
     environment:
       CRAWLER_PORT: ${CRAWLER_PORT}
       WEBDRIVER_URL: ${WEBDRIVER_URL}
