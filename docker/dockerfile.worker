@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim AS base
 RUN npm install -g pnpm typescript
 
 RUN apt-get update \
- && apt-get install -y ffmpeg yt-dlp \
+ && apt-get install -y ffmpeg yt-dlp chromium \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
