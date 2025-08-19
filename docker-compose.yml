@@ -22,6 +22,7 @@ services:
       REDIS_URL: ${REDIS_URL}
       CRAWLER_URL: ${CRAWLER_URL}
       ASSEMBLYAI_API_KEY: ${ASSEMBLYAI_API_KEY}
+      YT_COOKIES: ${YT_COOKIES}
 
   crawler:
     build:
@@ -38,7 +39,7 @@ services:
 
   chromedriver:
     image: seleniarm/standalone-chromium:latest
-    shm_size: '2g'
+    shm_size: "2g"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
       interval: 10s

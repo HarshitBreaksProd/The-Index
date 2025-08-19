@@ -111,6 +111,7 @@ export const indexCardRouter = t.router({
         };
       }
     }),
+
   fetchSharableIndexCard: publicProcedure
     .input(z.object({ shareableId: z.string() }))
     .query(async (req) => {
@@ -133,6 +134,35 @@ export const indexCardRouter = t.router({
         console.log(error);
         return {
           message: "could not fetch index card",
+        };
+      }
+    }),
+
+  retryCardProcessing: privateProcedure
+    .input(z.object({ cardId: z.string() }))
+    .mutation(async (req) => {
+      try {
+        const [indexCard] = await db
+          .select()
+          .from(indexCards)
+          .where(eq(indexCards.id, req.input.cardId));
+
+        if (indexCard?.userId !== Number(req.ctx.user.userId)) {
+          throw new Error("Only the cards owner can trigger reprocessing");
+        }
+        await processingQueue.add(`process-card-${req.input.cardId}`, {
+          cardId: req.input.cardId,
+        } as CardProcessingJobData);
+        console.log(`Dispatched job for ${req.input.cardId}`);
+
+        return {
+          message: "Started processing the card",
+        };
+      } catch (error) {
+        console.log("Error re processing card");
+        console.log(error);
+        return {
+          message: "could not retry processing of card",
         };
       }
     }),

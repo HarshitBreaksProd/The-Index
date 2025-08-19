@@ -15,7 +15,8 @@ const ytDlpWrap = new YTDlpWrap();
 export const runTranscriptionService = async (url: string) => {
   console.log("[TRANSCRIPTION] Downloading audio...");
   const audioFilePath = path.join("./temp", `${Date.now()}.mp3`);
-
+  const cookiesPath = path.join("./temp", `cookies-${Date.now()}.txt`);
+  
   await ytDlpWrap.execPromise([
     url,
     "-x",
@@ -24,6 +25,8 @@ export const runTranscriptionService = async (url: string) => {
     "--no-keep-video",
     "-f",
     "bestaudio",
+    "--cookies", 
+    cookiesPath,
     "-o",
     audioFilePath,
   ]);
