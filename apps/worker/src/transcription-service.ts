@@ -27,6 +27,9 @@ export const runTranscriptionService = async (url: string) => {
   await ytDlpWrap.execPromise([
     url,
     "-x",
+    "--user-agent",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
+      "Chrome/117.0.5938.62 Safari/537.36",
     "--audio-format",
     "mp3",
     "--no-keep-video",
