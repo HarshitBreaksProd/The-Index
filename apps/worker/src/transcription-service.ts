@@ -2,7 +2,7 @@ import YTDlpWrap from "yt-dlp-wrap";
 import { retry } from "./utils/retry";
 import os from "os";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
 import { AssemblyAI } from "assemblyai";
 import "dotenv/config";
 
@@ -13,19 +13,21 @@ const assemblyClient = new AssemblyAI({
 const ytDlpWrap = new YTDlpWrap();
 
 export const runTranscriptionService = async (url: string) => {
-  console.log("[TRANSCRIPTION] Downloading audio...");
+  await fs.mkdir("temp", { recursive: true });
   const audioFilePath = path.join("./temp", `${Date.now()}.mp3`);
+  const cookiesFilePath = path.join("./temp", `${Date.now()}`);
 
+  await fs.writeFile(cookiesFilePath, process.env.YT_COOKIES!);
+
+  console.log("[TRANSCRIPTION] Downloading audio...");
   await ytDlpWrap.execPromise([
     url,
     "-x",
     "--audio-format",
     "mp3",
     "--no-keep-video",
-    "-f",
-    "bestaudio",
-    "--cookies-from-browser",
-    `chromium`,
+    "--cookies",
+    cookiesFilePath,
     "-o",
     audioFilePath,
   ]);
@@ -47,10 +49,13 @@ export const runTranscriptionService = async (url: string) => {
   } catch (error) {
     console.log("error transcripting");
     console.log(error);
-    fs.unlinkSync(audioFilePath);
+    await fs.unlink(audioFilePath);
+    await fs.unlink(cookiesFilePath);
     throw new Error(JSON.stringify(error));
   }
-  fs.unlinkSync(audioFilePath);
+
+  await fs.unlink(audioFilePath);
+  await fs.unlink(cookiesFilePath);
 
   return youtubeTranscript;
 };
