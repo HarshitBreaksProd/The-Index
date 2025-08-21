@@ -19,6 +19,10 @@ export const runTranscriptionService = async (url: string) => {
 
   await fs.writeFile(cookiesFilePath, process.env.YT_COOKIES!);
 
+  const cookies = await (await fs.readFile(cookiesFilePath)).toLocaleString();
+
+  console.log(cookies);
+
   console.log("[TRANSCRIPTION] Downloading audio...");
   await ytDlpWrap.execPromise([
     url,
@@ -31,7 +35,7 @@ export const runTranscriptionService = async (url: string) => {
     "-o",
     audioFilePath,
   ]);
-  
+
   console.log("[TRANSCRIPTION] Audio downloaded...", audioFilePath);
   const params = {
     audio: audioFilePath,
