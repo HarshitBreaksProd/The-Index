@@ -31,7 +31,7 @@ export const runTranscriptionService = async (url: string) => {
     "-o",
     audioFilePath,
   ]);
-
+  
   console.log("[TRANSCRIPTION] Audio downloaded...", audioFilePath);
   const params = {
     audio: audioFilePath,
